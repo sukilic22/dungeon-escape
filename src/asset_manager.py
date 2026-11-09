@@ -1,9 +1,3 @@
-"""AssetManager: loads images and sounds once and hands them out by name.
-
-If a file is missing the game still runs: a purple placeholder square is used
-for images and missing sounds are simply silent. (Run tools/generate_assets.py
-to re-create the files.)
-"""
 
 import pygame
 
@@ -32,7 +26,7 @@ class AssetManager:
         self._load_sounds()
         self._make_effects()
 
-    # ------------------------------------------------------------ loading
+    #loading
     def _load_images(self):
         for name in IMAGE_NAMES:
             path = IMAGES_DIR / (name + ".png")
@@ -53,25 +47,19 @@ class AssetManager:
                 pass
 
     def _make_effects(self):
-        """Small generated surfaces: shadows, torch glow and the dark vignette."""
-        # Shadow below walls
         self.shadow = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
         for y in range(16):
             alpha = int(120 * (1 - y / 16) ** 2)
             pygame.draw.line(self.shadow, (10, 6, 20, alpha), (0, y), (TILE_SIZE, y))
-        # Round shadow under characters
         self.shadow_oval = pygame.Surface((32, 12), pygame.SRCALPHA)
         pygame.draw.ellipse(self.shadow_oval, (0, 0, 0, 90), self.shadow_oval.get_rect())
-        # Torch glows (three brightness levels so the light can flicker)
         self._glows = [self._make_glow(strength) for strength in (0.7, 0.85, 1.0)]
-        # Dark brick wall used behind every menu screen
         self.background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         for row in range(SCREEN_HEIGHT // TILE_SIZE):
             for col in range(SCREEN_WIDTH // TILE_SIZE):
                 self.background.blit(self.image("wall_%d" % ((col + row) % 2)),
                                      (col * TILE_SIZE, row * TILE_SIZE))
         self.background.fill((105, 95, 130), special_flags=pygame.BLEND_RGB_MULT)
-        # Dark corners
         self.vignette = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         for i in range(0, 140, 4):
             alpha = int(150 * (1 - i / 140) ** 2)
@@ -92,9 +80,8 @@ class AssetManager:
         index = min(2, max(0, int((flicker - 0.85) / 0.075 + 0.5)))
         return self._glows[index]
 
-    # ------------------------------------------------------------- images
+    #images
     def image(self, name, scale=SPRITE_SCALE):
-        """Return the image `name`, enlarged `scale` times (pixel-art style)."""
         key = (name, scale)
         if key not in self._scaled:
             original = self._originals[name]
@@ -102,7 +89,7 @@ class AssetManager:
             self._scaled[key] = pygame.transform.scale(original, size)
         return self._scaled[key]
 
-    # ------------------------------------------------------------- sounds
+    #sounds
     def play(self, name):
         sound = self.sounds.get(name)
         if sound is not None:

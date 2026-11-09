@@ -1,4 +1,3 @@
-"""Item (collectables) and Trap (spikes)."""
 
 import pygame
 
@@ -14,7 +13,6 @@ ITEM_INFO = {
 
 
 class Item:
-    """Something the player can pick up by touching it."""
 
     SIZE = 30
 
@@ -36,7 +34,6 @@ class Item:
         return ITEM_INFO[self.kind]["sound"]
 
     def collect(self, player):
-        """Give the item's effect to the player. Returns True if collected."""
         if self.collected:
             return False
         self.collected = True
@@ -63,14 +60,12 @@ class Item:
 
 
 class Trap:
-    """Floor spikes. They can be always up, or go up and down in a cycle."""
 
     CYCLE_TIME = 3.0     # seconds for one up/down cycle
-    SIZE = 28            # hit box is a bit smaller than the tile (fairer)
+    SIZE = 28            # hit box is a bit smaller than the tile
 
     def __init__(self, col, row, cycling=False):
         self.cycling = cycling
-        # Different traps start at different moments so they don't all sync.
         self.timer = ((col * 3 + row * 5) % 6) * 0.5
         self.rect = pygame.Rect(0, 0, self.SIZE, self.SIZE)
         self.rect.center = (col * TILE_SIZE + TILE_SIZE // 2,

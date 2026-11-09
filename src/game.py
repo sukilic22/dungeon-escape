@@ -1,8 +1,3 @@
-"""Game: owns the window, the main loop and the shared game data.
-
-It does not know *how* each screen looks. It only keeps the current screen
-(the "state") and passes events, updates and drawing to it.
-"""
 
 import pygame
 
@@ -39,9 +34,9 @@ class Game:
         self.level = None
         self.level_number = 1
         self.player_name = "Player"
-        self.last_bonus = (0, 0, 0)      # (level bonus, health bonus, time bonus)
+        self.last_bonus = (0, 0, 0)      # level bonus, health bonus, time bonus
 
-        # one object per screen
+        #one object per screen
         self.screens = {
             "menu": MenuScreen(self),
             "gameplay": GameplayScreen(self),
@@ -57,15 +52,14 @@ class Game:
         self.state = None
         self.change_state("menu")
 
-    # ------------------------------------------------------- state handling
+    #state handling
     def change_state(self, name):
         """Switch to another screen."""
         self.state = self.screens[name]
         self.state.on_enter()
 
-    # --------------------------------------------------- playthrough control
+    #playthrough control
     def start_new_game(self):
-        """Begin a fresh game at level 1 using the chosen difficulty."""
         config = self.settings.difficulty_config
         self.player = Player(max_health=config["health"])
         self.level_number = 1
@@ -73,7 +67,6 @@ class Game:
         self.change_state("gameplay")
 
     def load_level(self, number):
-        """Build level `number` and put the player on its start tile."""
         self.level_number = number
         self.level = Level(number, self.settings.difficulty_config["enemy_speed"])
         self.player.set_tile_position(*self.level.player_start)
@@ -82,7 +75,6 @@ class Game:
         self.screens["gameplay"].reset_effects()
 
     def level_finished(self):
-        """The player walked through the open door."""
         parts = ScoreManager.level_bonus_parts(self.level_number, self.player.health,
                                                self.level.elapsed)
         self.last_bonus = parts
@@ -94,7 +86,6 @@ class Game:
             self.change_state("level_complete")
 
     def next_level(self):
-        """Level transition: one heart is restored, then the next level loads."""
         self.player.heal(1)
         self.load_level(self.level_number + 1)
         self.change_state("gameplay")
@@ -104,14 +95,13 @@ class Game:
         self.change_state("game_over")
 
     def save_result(self, name):
-        """Store the finished game in scores.json."""
         self.player_name = name.strip() or "Player"
         self.score_manager.add_score(self.player_name, self.player.score, self.level_number)
 
     def quit(self):
         self.running = False
 
-    # ------------------------------------------------------------ main loop
+    #main loop
     def run(self):
         while self.running:
             # dt = seconds since last frame (limited, so a lag spike cannot

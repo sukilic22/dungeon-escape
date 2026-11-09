@@ -1,5 +1,3 @@
-"""ScoreManager: score calculation and the persistent JSON high-score file."""
-
 import json
 import os
 from datetime import datetime
@@ -10,23 +8,17 @@ from src.settings import (HEALTH_BONUS, LEVEL_BASE_BONUS, MAX_NAME_LENGTH,
 
 
 class ScoreManager:
-    """Loads, stores and analyses the scores saved in scores.json.
-
-    A saved score looks like this:
-        {"name": "Anna", "score": 350, "level": 2, "date": "2025-01-31 18:20"}
-    """
 
     def __init__(self, filepath=SCORES_FILE):
         self.filepath = Path(filepath)
         self.scores = []
-        self.last_error = ""        # a message the screens can display
+        self.last_error = ""        
         self.load_scores()
 
-    # -------------------------------------------------- score calculation
+    #score calculation
     @staticmethod
     def level_bonus_parts(level_number, health, seconds):
         """The three parts of the bonus for finishing a level.
-
         level bonus : 100 x level number
         health bonus: 25 per remaining heart
         time bonus  : 2 per second that was left of a 60 second time limit
@@ -41,18 +33,12 @@ class ScoreManager:
         """Total bonus points for finishing a level."""
         return sum(ScoreManager.level_bonus_parts(level_number, health, seconds))
 
-    # ---------------------------------------------------------- file I/O
+    #file I/O
     def load_scores(self):
-        """Read scores.json into memory.
-
-        * a missing file is created automatically;
-        * an empty, broken or wrong-shaped file is treated as "no scores";
-        * single bad entries are skipped instead of crashing the game.
-        """
         self.last_error = ""
         self.scores = []
         if not self.filepath.exists():
-            self.save_scores()      # creates the (empty) file and the folder
+            self.save_scores()      
             return self.scores
         try:
             with open(self.filepath, "r", encoding="utf-8") as file:
@@ -73,11 +59,6 @@ class ScoreManager:
         return self.scores
 
     def save_scores(self):
-        """Write the scores to disk. Returns True on success.
-
-        We first write a temporary file and then replace the real one, so a
-        crash while saving cannot leave a half-written scores.json behind.
-        """
         try:
             self.filepath.parent.mkdir(parents=True, exist_ok=True)
             temp_path = self.filepath.with_suffix(".tmp")
@@ -91,7 +72,6 @@ class ScoreManager:
 
     @staticmethod
     def _clean_entry(entry):
-        """Return a valid score dict, or None if `entry` is broken."""
         if not isinstance(entry, dict):
             return None
         try:
@@ -104,9 +84,8 @@ class ScoreManager:
         except (KeyError, TypeError, ValueError):
             return None
 
-    # ------------------------------------------------------- changing data
+    #changing data
     def add_score(self, name, score, level):
-        """Add one finished game and save. Returns the new entry."""
         name = name.strip()[:MAX_NAME_LENGTH] or "Player"
         entry = {
             "name": name,
@@ -119,18 +98,15 @@ class ScoreManager:
         return entry
 
     def clear_scores(self):
-        """Delete the whole history (used by the admin panel)."""
         self.scores = []
         return self.save_scores()
 
-    # ------------------------------------------------------------- queries
+    #queries
     def get_sorted_scores(self, limit=None):
-        """Highest score first. Equal scores: the higher level comes first."""
         ordered = sorted(self.scores, key=lambda s: (s["score"], s["level"]), reverse=True)
         return ordered if limit is None else ordered[:limit]
 
     def get_statistics(self):
-        """Basic numbers for the admin panel."""
         if not self.scores:
             return {"games": 0, "highest": 0, "average": 0, "best_player": "-"}
         best = self.get_sorted_scores(1)[0]

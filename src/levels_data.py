@@ -1,8 +1,5 @@
 """The three handcrafted dungeon layouts.
 
-Every level is a list of 14 strings with 20 characters each (one character =
-one tile), so you can "see" the map right in the code and edit it easily.
-
 Legend
 ------
 #  stone wall                 T  wall with a torch
@@ -13,13 +10,10 @@ H  treasure chest (bonus)     +  heart (restores 1 health)
 B  barrel (obstacle)          X  crate (obstacle)
 G  goblin (walks left/right)  S  skeleton (walks up/down)
 L  slime (walks left/right, slowest)
-
-The first two rows of the four left and four right columns are always walls,
-because the HUD and the mini-map are drawn on top of them.
 """
 
 LEVELS = [
-    # ------------------------------------------------------------ level 1
+    #level 1
     {
         "name": "The Cellar",
         "layout": [
@@ -39,7 +33,7 @@ LEVELS = [
             "#####" "#####" "#####" "#####",
         ],
     },
-    # ------------------------------------------------------------ level 2
+    #level 2
     {
         "name": "The Crypt",
         "layout": [
@@ -59,7 +53,7 @@ LEVELS = [
             "####################",
         ],
     },
-    # ------------------------------------------------------------ level 3
+    #level 3
     {
         "name": "The Lost Vault",
         "layout": [

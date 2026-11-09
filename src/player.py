@@ -1,14 +1,12 @@
-"""Player: the hooded hero controlled with the keyboard."""
-
 import pygame
 
 from src.settings import TILE_SIZE
 
 
 class Player:
-    SIZE = 28                # hit box (smaller than a tile so corridors are easy)
-    SPEED = 190              # pixels per second
-    INVINCIBLE_TIME = 1.2    # seconds of protection after being hit
+    SIZE = 28               
+    SPEED = 190              
+    INVINCIBLE_TIME = 1.2    
 
     def __init__(self, col=1, row=1, max_health=3):
         self.max_health = max_health
@@ -24,20 +22,16 @@ class Player:
         self.y = 0.0
         self.set_tile_position(col, row)
 
-    # ----------------------------------------------------------- position
+    #position
     def set_tile_position(self, col, row):
         """Put the player in the middle of the given tile."""
         self.x = col * TILE_SIZE + (TILE_SIZE - self.SIZE) / 2
         self.y = row * TILE_SIZE + (TILE_SIZE - self.SIZE) / 2
         self.rect.topleft = (round(self.x), round(self.y))
 
-    # -------------------------------------------------------------- input
+    #input
     @staticmethod
     def direction_from_keys(pressed):
-        """Turn the pressed keys into a direction (dx, dy), each -1, 0 or 1.
-
-        `pressed` is what pygame.key.get_pressed() returns.
-        """
         dx = dy = 0
         if pressed[pygame.K_LEFT] or pressed[pygame.K_a]:
             dx -= 1
@@ -49,18 +43,12 @@ class Player:
             dy += 1
         return dx, dy
 
-    # ----------------------------------------------------------- movement
+    #movement
     def move(self, dx, dy, dt, maze):
-        """Move with collision detection against the maze walls.
-
-        We move on the X axis first, fix any collision, then do the same on
-        the Y axis. Handling the axes separately lets the player slide along
-        walls instead of getting stuck on them.
-        """
         self.moving = (dx != 0 or dy != 0)
         if not self.moving:
             return
-        if dx != 0 and dy != 0:      # diagonal movement must not be faster
+        if dx != 0 and dy != 0:      
             dx *= 0.7071
             dy *= 0.7071
         self._move_axis(dx * self.SPEED * dt, 0, maze)
@@ -95,7 +83,7 @@ class Player:
                 self.rect.top = wall.bottom
                 self.y = self.rect.y
 
-    # -------------------------------------------------------------- state
+    #state
     def update(self, dt):
         if self.invincible_timer > 0:
             self.invincible_timer = max(0.0, self.invincible_timer - dt)
@@ -113,11 +101,6 @@ class Player:
         return self.keys > 0
 
     def take_damage(self, amount=1):
-        """Lose health. Returns True if damage was really taken.
-
-        Right after a hit the player is invincible for a short time, so
-        standing on a trap does not kill you in a single frame.
-        """
         if self.is_invincible or not self.is_alive:
             return False
         self.health = max(0, self.health - amount)
@@ -130,9 +113,8 @@ class Player:
     def add_score(self, points):
         self.score += points
 
-    # ------------------------------------------------------------ drawing
+    #drawing
     def draw(self, surface, assets):
-        # Blink while invincible.
         if self.is_invincible and int(self.invincible_timer * 12) % 2 == 0:
             return
         if self.facing in ("left", "right"):

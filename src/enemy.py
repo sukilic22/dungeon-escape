@@ -1,10 +1,8 @@
-"""Enemy: a monster that patrols back and forth until it hits a wall."""
 
 import pygame
 
 from src.settings import TILE_SIZE
 
-# axis: the direction it walks in, speed: pixels per second
 ENEMY_TYPES = {
     "goblin": {"axis": "x", "speed": 95},
     "skeleton": {"axis": "y", "speed": 80},
@@ -22,7 +20,7 @@ class Enemy:
         self.kind = kind
         self.axis = info["axis"]
         self.speed = info["speed"] * speed_multiplier
-        self.direction = 1          # +1 = right/down, -1 = left/up
+        self.direction = 1        
         self.timer = 0.0
         self.rect = pygame.Rect(0, 0, self.SIZE, self.SIZE)
         self.x = col * TILE_SIZE + (TILE_SIZE - self.SIZE) / 2
@@ -30,7 +28,6 @@ class Enemy:
         self.rect.topleft = (round(self.x), round(self.y))
 
     def update(self, dt, maze):
-        """Walk forward. When a wall is hit, turn around (simple patrol AI)."""
         self.timer += dt
         step = self.speed * self.direction * dt
         if self.axis == "x":
@@ -58,15 +55,15 @@ class Enemy:
             break
 
     def touches(self, rect):
-        """True if the enemy overlaps `rect` (used for hurting the player)."""
+        """True if the enemy overlaps `rect` (use for hurting the player)."""
         return self.rect.colliderect(rect)
 
     def draw(self, surface, assets):
         image = assets.image(self.kind)
         if self.axis == "x":
-            flip = self.direction < 0                 # face the walking direction
+            flip = self.direction < 0                 
         else:
-            flip = int(self.timer * 4) % 2 == 1       # waddle while walking up/down
+            flip = int(self.timer * 4) % 2 == 1       
         if flip:
             image = pygame.transform.flip(image, True, False)
         bob = 3 if int(self.timer * 6) % 2 else 0

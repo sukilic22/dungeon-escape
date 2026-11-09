@@ -1,53 +1,21 @@
-"""Reusable user-interface pieces: text, stone panels, Button, Slider,
-TextInput, and the in-game HUD (hearts, score, keys, mini-map).
-"""
-
 import pygame
 
 from src.settings import (COLOR_GOLD, COLOR_OUTLINE, COLOR_PANEL, COLOR_PANEL_DARK,
                           COLOR_TEXT, SCREEN_HEIGHT, SCREEN_WIDTH, TOTAL_LEVELS, TILE_SIZE)
 from src.maze import SOLID_TILES
 
-# --------------------------------------------------------------------- text
+#text
 _font_cache = {}
 _text_cache = {}
 
 
-def render_text(text, size=24, color=COLOR_TEXT, outline=COLOR_OUTLINE):
-    """Draw text in a chunky pixel-font style and return it as a Surface.
-
-    The text is rendered small, hardened to pure pixels (no blur) and then
-    enlarged x2, which gives hard pixel edges that fit the pixel-art look.
-    """
-    key = (text, size, color, outline)
-    if key in _text_cache:
-        return _text_cache[key]
-    base_size = max(8, int(size * 0.56))
-    if base_size not in _font_cache:
-        _font_cache[base_size] = pygame.font.Font(None, base_size)
-    font = _font_cache[base_size]
-
-    def make(col):
-        smooth = font.render(text, True, (255, 255, 255))
-        mask = pygame.mask.from_surface(smooth, 110)      # keep only solid pixels
-        small = mask.to_surface(setcolor=col, unsetcolor=(0, 0, 0, 0))
-        return pygame.transform.scale(small, (small.get_width() * 2, small.get_height() * 2))
-
-    body = make(color)
-    if outline is None:
-        _text_cache[key] = body
-        return body
-    shade = make(outline)
-    result = pygame.Surface((body.get_width() + 6, body.get_height() + 8), pygame.SRCALPHA)
-    for dx, dy in ((0, 0), (4, 0), (0, 4), (4, 4), (2, 0), (2, 4), (0, 2), (4, 2), (2, 6), (4, 6)):
-        result.blit(shade, (dx, dy))
-    result.blit(body, (2, 2))
-    _text_cache[key] = result
-    return result
+def render_text(text, size=24, color=COLOR_TEXT, outline=None):
+    if size not in _font_cache:
+        _font_cache[size] = pygame.font.Font(None, size)
+    return _font_cache[size].render(text, True, color)
 
 
 def draw_text(surface, text, size, color, pos, anchor="center", outline=COLOR_OUTLINE):
-    """Render `text` and place it so that `anchor` of the text is at `pos`."""
     image = render_text(text, size, color, outline)
     rect = image.get_rect()
     setattr(rect, anchor, pos)
@@ -55,9 +23,8 @@ def draw_text(surface, text, size, color, pos, anchor="center", outline=COLOR_OU
     return rect
 
 
-# ------------------------------------------------------------------- panels
+#panels
 def draw_panel(surface, rect, frame=12):
-    """A stone frame with a dark inside, like the panels in the artwork."""
     rect = pygame.Rect(rect)
     shadow = rect.move(6, 8)
     pygame.draw.rect(surface, (8, 6, 14), shadow)
@@ -86,9 +53,8 @@ def draw_panel(surface, rect, frame=12):
     return face
 
 
-# ------------------------------------------------------------------ button
+#button
 class Button:
-    """A stone button with hover, focus and pressed looks."""
 
     def __init__(self, text, rect, action=None, size=26, danger=False):
         self.text = text
@@ -97,7 +63,7 @@ class Button:
         self.size = size
         self.danger = danger
         self.pressed = False
-        self.focused = False        # highlighted with the keyboard
+        self.focused = False        
         self.enabled = True
 
     @property
@@ -105,7 +71,6 @@ class Button:
         return self.rect.collidepoint(pygame.mouse.get_pos())
 
     def handle_event(self, event):
-        """Returns True when the button was clicked (and runs its action)."""
         if not self.enabled:
             return False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -149,9 +114,8 @@ class Button:
                   (rect.centerx, rect.centery - 1 + offset))
 
 
-# ------------------------------------------------------------------ slider
+#slider
 class Slider:
-    """A horizontal slider for values between 0.0 and 1.0."""
 
     def __init__(self, rect, value=0.5):
         self.rect = pygame.Rect(rect)
@@ -193,9 +157,8 @@ class Slider:
         pygame.draw.rect(surface, (210, 206, 230), (knob.x, knob.y, knob.w, 4))
 
 
-# --------------------------------------------------------------- text input
+#text input
 class TextInput:
-    """A one-line text box. Can hide its text with * for passwords."""
 
     def __init__(self, rect, text="", max_length=12, masked=False, placeholder=""):
         self.rect = pygame.Rect(rect)
@@ -237,9 +200,8 @@ class TextInput:
             pygame.draw.rect(surface, COLOR_GOLD, (caret_x, self.rect.centery - 11, 4, 22))
 
 
-# ----------------------------------------------------------------------- HUD
+#HUD
 class HUD:
-    """Heads-up display: hearts, score, keys, level name, mini-map, pause button."""
 
     PAUSE_RECT = pygame.Rect(SCREEN_WIDTH - 44, SCREEN_HEIGHT - 44, 36, 36)
 

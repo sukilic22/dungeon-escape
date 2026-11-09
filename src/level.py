@@ -1,4 +1,3 @@
-"""Level: builds one dungeon from its layout and runs its game rules."""
 
 from src.enemy import Enemy
 from src.item import Item, Trap
@@ -27,7 +26,6 @@ class Level:
         self._parse_layout(data["layout"], enemy_speed)
 
     def _parse_layout(self, layout, enemy_speed):
-        """Walk over the text map and create an object for every symbol."""
         for row, line in enumerate(layout):
             for col, ch in enumerate(line):
                 if ch == "P":
@@ -41,13 +39,8 @@ class Level:
                 elif ch == "v":
                     self.traps.append(Trap(col, row, cycling=True))
 
-    # --------------------------------------------------------------- rules
+    #rules
     def update(self, dt, player):
-        """Advance the level by `dt` seconds.
-
-        Returns a list of event names ("coin", "hurt", "door_open"...) so the
-        screen can play the right sounds without the Level knowing about audio.
-        """
         events = []
         self.elapsed += dt
         self.locked_hint_timer = max(0.0, self.locked_hint_timer - dt)
@@ -83,7 +76,6 @@ class Level:
         return []
 
     def check_door(self, player):
-        """Locked door: opens only with the key. Open door: finishes the level."""
         door = self.maze.door_rect()
         if door is None:
             return []
@@ -102,7 +94,7 @@ class Level:
             return ["level_complete"]
         return []
 
-    # ------------------------------------------------------------- drawing
+    #drawing
     def draw(self, surface, assets):
         self.maze.draw(surface, assets, self.elapsed)
         for trap in self.traps:

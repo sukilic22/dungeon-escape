@@ -1,16 +1,3 @@
-"""All game screens (states).
-
-Every screen is a class with the same four methods:
-
-    on_enter()        called when the screen becomes active
-    handle_event(e)   keyboard / mouse events
-    update(dt)        game logic, `dt` = seconds since the last frame
-    draw(surface)     draw everything
-
-The Game class keeps one object of each screen and switches between them.
-This idea is called a "state machine".
-"""
-
 import pygame
 
 from src.player import Player
@@ -24,7 +11,6 @@ GREY = (190, 186, 200)
 
 
 def draw_crown(surface, center, scale=1.0):
-    """A small gold crown made of polygons (used on win screens)."""
     cx, cy = center
     shape = [(-30, 16), (-36, -20), (-16, -2), (0, -28), (16, -2), (36, -20), (30, 16)]
     points = [(cx + x * scale, cy + y * scale) for x, y in shape]
@@ -39,7 +25,6 @@ def draw_crown(surface, center, scale=1.0):
 
 
 class Screen:
-    """Base class: stores the game, a list of buttons and keyboard focus."""
 
     keyboard_nav = True     # Up/Down/Enter move between buttons
 
@@ -60,7 +45,6 @@ class Screen:
         self.handle_buttons(event)
 
     def handle_buttons(self, event):
-        """Mouse clicks and keyboard navigation for the screen's buttons."""
         for button in self.buttons:
             if button.handle_event(event):
                 self.game.assets.play("click")
@@ -87,7 +71,7 @@ class Screen:
             button.draw(surface)
 
 
-# =============================================================== main menu
+#main menu
 class MenuScreen(Screen):
     def __init__(self, game):
         super().__init__(game)
@@ -105,20 +89,17 @@ class MenuScreen(Screen):
     def _build_backdrop(self):
         assets = self.game.assets
         back = assets.background.copy()
-        # a big stone arch behind the title and buttons
         arch_center = (CX, 250)
         pygame.draw.circle(back, (58, 54, 78), arch_center, 262)
         pygame.draw.rect(back, (58, 54, 78), (CX - 262, 250, 524, SCREEN_HEIGHT))
         pygame.draw.circle(back, (22, 18, 34), arch_center, 236)
         pygame.draw.rect(back, (22, 18, 34), (CX - 236, 250, 472, SCREEN_HEIGHT))
-        for angle_x in range(CX - 262, CX + 263, 40):          # stone joints
+        for angle_x in range(CX - 262, CX + 263, 40):         
             pygame.draw.line(back, (40, 36, 56), (angle_x, 270), (angle_x, SCREEN_HEIGHT), 2)
-        # hanging chains in the corners
         for base_x in (60, 100, SCREEN_WIDTH - 60, SCREEN_WIDTH - 100):
             for i, y in enumerate(range(-10, 150 + (base_x % 3) * 20, 18)):
                 width = 12 if i % 2 == 0 else 6
                 pygame.draw.ellipse(back, (90, 88, 104), (base_x - width // 2, y, width, 20), 3)
-        # decorations
         back.blit(assets.image("chest_closed", 6), (24, SCREEN_HEIGHT - 150))
         back.blit(assets.image("skull", 5), (SCREEN_WIDTH - 150, SCREEN_HEIGHT - 110))
         back.blit(assets.image("skull", 4), (SCREEN_WIDTH - 220, SCREEN_HEIGHT - 80))
@@ -141,14 +122,12 @@ class MenuScreen(Screen):
     def draw(self, surface):
         assets = self.game.assets
         surface.blit(self.backdrop, (0, 0))
-        # animated torches left and right
         frame = int(self.time * 6) % 2
         for x in (150, SCREEN_WIDTH - 150):
             glow = assets.glow(0.85 + 0.15 * ((int(self.time * 9) % 3) / 2))
             surface.blit(glow, glow.get_rect(center=(x, 330)), special_flags=pygame.BLEND_RGB_ADD)
             torch = assets.image("torch_%d" % frame, 7)
             surface.blit(torch, torch.get_rect(center=(x, 360)))
-        # title
         draw_text(surface, "DUNGEON", 96, (226, 218, 198), (CX, 96))
         draw_text(surface, "ESCAPE", 96, (226, 218, 198), (CX, 176))
         draw_text(surface, "The Lost Key", 38, COLOR_GOLD, (CX, 246))
@@ -161,7 +140,7 @@ class MenuScreen(Screen):
                   (CX, SCREEN_HEIGHT - 18))
 
 
-# ================================================================ gameplay
+
 class GameplayScreen(Screen):
     SOUND_FOR_EVENT = {"coin": "coin", "key": "key", "chest": "chest", "heart": "heart",
                        "hurt": "hurt", "door_open": "door_open", "door_locked": "locked"}
@@ -234,7 +213,7 @@ class GameplayScreen(Screen):
                       40, COLOR_GOLD, rect.center)
 
 
-# ============================================================ pause menu
+#pause menu
 class PauseScreen(Screen):
     def __init__(self, game):
         super().__init__(game)
@@ -259,7 +238,7 @@ class PauseScreen(Screen):
         self.draw_buttons(surface)
 
 
-# ============================================================== settings
+#settings
 class SettingsScreen(Screen):
     def __init__(self, game):
         super().__init__(game)
@@ -322,7 +301,7 @@ class SettingsScreen(Screen):
         self.back.draw(surface)
 
 
-# ============================================================ high scores
+#high scores
 class HighScoresScreen(Screen):
     def __init__(self, game):
         super().__init__(game)
@@ -370,11 +349,11 @@ def draw_score_table(surface, scores, max_rows, top, row_height):
         draw_text(surface, score["date"], 22, GREY, (columns[4][1], y), "midleft")
 
 
-# ======================================================== end-of-game base
+#end-of-game base
 class EndScreen(Screen):
     """Shared code for the Game Over and Victory screens: name box + 2 buttons."""
 
-    keyboard_nav = False    # the arrow keys / letters belong to the name box
+    keyboard_nav = False   
     title = ""
     title_color = COLOR_TEXT
     again_text = "Try Again"
@@ -452,7 +431,7 @@ class VictoryScreen(EndScreen):
         draw_crown(surface, (CX, 110), 1.9)
 
 
-# ========================================================== level complete
+#level complete
 class LevelCompleteScreen(Screen):
     def __init__(self, game):
         super().__init__(game)
@@ -483,7 +462,7 @@ class LevelCompleteScreen(Screen):
         draw_crown(surface, (CX, 120), 1.9)
 
 
-# ============================================================ admin panel
+#admin panel
 class AdminLoginScreen(Screen):
     keyboard_nav = False
 
@@ -573,7 +552,7 @@ class AdminPanelScreen(Screen):
         self.message = "Cancelled - nothing was deleted."
 
     def handle_event(self, event):
-        if self.confirming:          # while the question is open only its buttons work
+        if self.confirming:          
             for button in (self.yes_button, self.no_button):
                 if button.handle_event(event):
                     self.game.assets.play("click")
