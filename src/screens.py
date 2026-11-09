@@ -1,9 +1,7 @@
 import pygame
 
 from src.player import Player
-from src.settings import (COLOR_GOLD, COLOR_GREEN, COLOR_OUTLINE, COLOR_RED, COLOR_TEXT,
-                          DIFFICULTIES, KEYS_REQUIRED, MAX_NAME_LENGTH, SCREEN_HEIGHT,
-                          SCREEN_WIDTH, TOTAL_LEVELS, check_admin_password)
+from src.settings import *
 from src.ui import HUD, Button, Slider, TextInput, draw_panel, draw_text
 
 CX = SCREEN_WIDTH // 2
@@ -79,7 +77,7 @@ class MenuScreen(Screen):
         labels = [("Play", g.start_new_game),
                   ("High Scores", lambda: g.change_state("high_scores")),
                   ("Settings", lambda: g.change_state("settings")),
-                  ("Admin Panel", lambda: g.change_state("admin_login")),
+
                   ("Quit", g.quit)]
         for i, (text, action) in enumerate(labels):
             self.buttons.append(Button(text, (CX - 140, 306 + i * 56, 280, 46), action))
@@ -122,12 +120,18 @@ class MenuScreen(Screen):
     def draw(self, surface):
         assets = self.game.assets
         surface.blit(self.backdrop, (0, 0))
+
         frame = int(self.time * 6) % 2
+        if frame == 0:
+            glow = assets.glow(1.0)
+        else:
+            glow = assets.glow(0.85)
+        torch = assets.image(f"torch_{frame}", 7)
+
         for x in (150, SCREEN_WIDTH - 150):
-            glow = assets.glow(0.85 + 0.15 * ((int(self.time * 9) % 3) / 2))
             surface.blit(glow, glow.get_rect(center=(x, 330)), special_flags=pygame.BLEND_RGB_ADD)
-            torch = assets.image("torch_%d" % frame, 7)
             surface.blit(torch, torch.get_rect(center=(x, 360)))
+
         draw_text(surface, "DUNGEON", 96, (226, 218, 198), (CX, 96))
         draw_text(surface, "ESCAPE", 96, (226, 218, 198), (CX, 176))
         draw_text(surface, "The Lost Key", 38, COLOR_GOLD, (CX, 246))
@@ -167,7 +171,7 @@ class GameplayScreen(Screen):
                 self.game.assets.play("click")
                 self.pause()
         elif event.type == getattr(pygame, "WINDOWFOCUSLOST", -1):
-            self.pause()    # pause automatically when the window loses focus
+            self.pause()    
 
     def update(self, dt):
         game = self.game
@@ -195,22 +199,24 @@ class GameplayScreen(Screen):
         game.level.draw(surface, assets)
         game.player.draw(surface, assets)
         surface.blit(assets.vignette, (0, 0))
+
         if self.flash_timer > 0:
             flash = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-            flash.fill((200, 20, 30, int(150 * self.flash_timer / 0.3)))
+            flash.fill((200, 20, 30, int(self.flash_timer * 500)))
             surface.blit(flash, (0, 0))
+
         self.hud.draw(surface, assets, game.player, game.level, KEYS_REQUIRED)
         self.hud.draw_pause_button(surface)
+
         if game.level.locked_hint_timer > 0:
             draw_text(surface, "The door is locked. Find the key!", 30, COLOR_GOLD, (CX, 130))
+
         if self.banner_timer > 0:
-            banner = pygame.Surface((520, 70), pygame.SRCALPHA)
-            banner.fill((10, 8, 18, 200))
-            rect = banner.get_rect(center=(CX, SCREEN_HEIGHT // 2 - 90))
-            surface.blit(banner, rect)
+            rect = pygame.Rect(0, 0, 520, 70)
+            rect.center = (CX, SCREEN_HEIGHT // 2 - 90)
+            pygame.draw.rect(surface, (10, 8, 18), rect)
             pygame.draw.rect(surface, (120, 116, 146), rect, 3)
-            draw_text(surface, "Level %d: %s" % (game.level.number, game.level.name),
-                      40, COLOR_GOLD, rect.center)
+            draw_text(surface, f"Level {game.level.number}: {game.level.name}", 40, COLOR_GOLD, rect.center)
 
 
 #pause menu
@@ -328,7 +334,6 @@ class HighScoresScreen(Screen):
 
 
 def draw_score_table(surface, scores, max_rows, top, row_height):
-    """Shared by the High Scores screen and the Admin Panel."""
     columns = [("Rank", CX - 355, "midleft"), ("Name", CX - 290, "midleft"),
                ("Score", CX + 20, "midright"), ("Level", CX + 90, "center"),
                ("Date", CX + 150, "midleft")]
@@ -351,7 +356,6 @@ def draw_score_table(surface, scores, max_rows, top, row_height):
 
 #end-of-game base
 class EndScreen(Screen):
-    """Shared code for the Game Over and Victory screens: name box + 2 buttons."""
 
     keyboard_nav = False   
     title = ""
@@ -374,7 +378,6 @@ class EndScreen(Screen):
         self.name_input.text = self.game.player_name
 
     def save_score(self):
-        """Save the result once, then remember the name for next time."""
         if not self.saved:
             self.game.save_result(self.name_input.text)
             self.saved = True

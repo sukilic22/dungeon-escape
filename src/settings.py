@@ -2,8 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 
-#paths
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).parent.parent
 ASSETS_DIR = BASE_DIR / "assets"
 IMAGES_DIR = ASSETS_DIR / "images"
 SOUNDS_DIR = ASSETS_DIR / "sounds"
@@ -11,18 +10,16 @@ DATA_DIR = BASE_DIR / "data"
 SCORES_FILE = DATA_DIR / "scores.json"
 SETTINGS_FILE = DATA_DIR / "settings.json"
 
-#display
-TILE_SIZE = 48            
-SPRITE_PIXELS = 16        
+TILE_SIZE = 48
+SPRITE_PIXELS = 16
 SPRITE_SCALE = TILE_SIZE // SPRITE_PIXELS
 GRID_COLS = 20
 GRID_ROWS = 14
-SCREEN_WIDTH = GRID_COLS * TILE_SIZE   # 960
-SCREEN_HEIGHT = GRID_ROWS * TILE_SIZE  # 672
+SCREEN_WIDTH = GRID_COLS * TILE_SIZE
+SCREEN_HEIGHT = GRID_ROWS * TILE_SIZE
 FPS = 60
 TITLE = "Dungeon Escape: The Lost Key"
 
-#colours
 COLOR_TEXT = (232, 226, 210)
 COLOR_GOLD = (244, 200, 70)
 COLOR_RED = (222, 58, 58)
@@ -30,18 +27,15 @@ COLOR_GREEN = (110, 200, 90)
 COLOR_OUTLINE = (16, 12, 24)
 COLOR_PANEL = (52, 50, 68)
 COLOR_PANEL_DARK = (30, 28, 42)
-COLOR_PANEL_LIGHT = (104, 100, 128)
 
-#scoring
 COIN_POINTS = 10
 KEY_POINTS = 25
 CHEST_POINTS = 50
-LEVEL_BASE_BONUS = 100     
-HEALTH_BONUS = 25          
-TIME_BONUS_LIMIT = 60      
+LEVEL_BASE_BONUS = 100
+HEALTH_BONUS = 25
+TIME_BONUS_LIMIT = 60
 TIME_BONUS_PER_SECOND = 2
 
-#gameplay
 TOTAL_LEVELS = 3
 KEYS_REQUIRED = 1
 MAX_NAME_LENGTH = 12
@@ -53,12 +47,10 @@ DIFFICULTIES = {
 }
 DIFFICULTY_ORDER = ["Easy", "Normal", "Hard"]
 
-# The password is:  admin123
 ADMIN_PASSWORD_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"
 
 
 def check_admin_password(password):
-    """Return True if `password` matches the stored admin password hash."""
     entered_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
     return entered_hash == ADMIN_PASSWORD_HASH
 
@@ -76,20 +68,23 @@ class GameSettings:
         return DIFFICULTIES[self.difficulty]
 
     def change_difficulty(self, step):
-        index = DIFFICULTY_ORDER.index(self.difficulty)
-        index = max(0, min(len(DIFFICULTY_ORDER) - 1, index + step))
-        self.difficulty = DIFFICULTY_ORDER[index]
+        new_index = DIFFICULTY_ORDER.index(self.difficulty) + step
+        if 0 <= new_index < len(DIFFICULTY_ORDER):
+            self.difficulty = DIFFICULTY_ORDER[new_index]
+
+    def clamp(self, value):
+        return max(0.0, min(1.0, float(value)))
 
     def load(self):
         try:
             with open(self.filepath, "r", encoding="utf-8") as file:
                 data = json.load(file)
-            self.music_volume = self._clamp(data.get("music_volume", 0.5))
-            self.sfx_volume = self._clamp(data.get("sfx_volume", 0.7))
+            self.music_volume = self.clamp(data.get("music_volume", 0.5))
+            self.sfx_volume = self.clamp(data.get("sfx_volume", 0.7))
             if data.get("difficulty") in DIFFICULTIES:
                 self.difficulty = data["difficulty"]
-        except (OSError, ValueError, AttributeError, TypeError):
-            pass  
+        except Exception:
+            pass
 
     def save(self):
         data = {
@@ -98,13 +93,8 @@ class GameSettings:
             "difficulty": self.difficulty,
         }
         try:
-            self.filepath.parent.mkdir(parents=True, exist_ok=True)
             with open(self.filepath, "w", encoding="utf-8") as file:
                 json.dump(data, file, indent=2)
             return True
-        except OSError:
+        except Exception:
             return False
-
-    @staticmethod
-    def _clamp(value):
-        return max(0.0, min(1.0, float(value)))
