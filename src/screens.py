@@ -77,7 +77,7 @@ class MenuScreen(Screen):
         labels = [("Play", g.start_new_game),
                   ("High Scores", lambda: g.change_state("high_scores")),
                   ("Settings", lambda: g.change_state("settings")),
-
+                  ("Admin Panel", lambda: g.change_state("admin_login")),
                   ("Quit", g.quit)]
         for i, (text, action) in enumerate(labels):
             self.buttons.append(Button(text, (CX - 140, 306 + i * 56, 280, 46), action))
