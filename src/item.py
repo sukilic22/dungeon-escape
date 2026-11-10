@@ -1,7 +1,6 @@
-
 import pygame
 
-from src.settings import (CHEST_POINTS, COIN_POINTS, KEY_POINTS, TILE_SIZE)
+from src.settings import *
 
 # What each kind of item is worth and which sound it plays.
 ITEM_INFO = {
@@ -20,18 +19,13 @@ class Item:
         if kind not in ITEM_INFO:
             raise ValueError("Unknown item kind: " + kind)
         self.kind = kind
+        self.points = ITEM_INFO[kind]["points"]
+        self.sound = ITEM_INFO[kind]["sound"]
         self.collected = False
         self.rect = pygame.Rect(0, 0, self.SIZE, self.SIZE)
         self.rect.center = (col * TILE_SIZE + TILE_SIZE // 2,
                             row * TILE_SIZE + TILE_SIZE // 2)
 
-    @property
-    def points(self):
-        return ITEM_INFO[self.kind]["points"]
-
-    @property
-    def sound(self):
-        return ITEM_INFO[self.kind]["sound"]
 
     def collect(self, player):
         if self.collected:
@@ -47,26 +41,26 @@ class Item:
     def draw(self, surface, assets, time):
         if self.kind == "chest":
             name = "chest_open" if self.collected else "chest_closed"
-            surface.blit(assets.image(name), self._image_pos(assets, name, 0))
+            bob = 0
         elif not self.collected:
-            # Small up-and-down bobbing so items catch the eye.
+            name = self.kind
             bob = 2 if int(time * 3) % 2 else 0
-            surface.blit(assets.image(self.kind), self._image_pos(assets, self.kind, bob))
+        else:
+            return
 
-    def _image_pos(self, assets, name, bob):
         image = assets.image(name)
-        return (self.rect.centerx - image.get_width() // 2,
-                self.rect.centery - image.get_height() // 2 - bob)
+        rect = image.get_rect(center=(self.rect.centerx, self.rect.centery - bob))
+        surface.blit(image, rect)
 
 
 class Trap:
 
-    CYCLE_TIME = 3.0     # seconds for one up/down cycle
-    SIZE = 28            # hit box is a bit smaller than the tile
+    CYCLE_TIME = 3.0     # seconds for one up/down cycle for spikes
+    SIZE = 28            # hit box
 
     def __init__(self, col, row, cycling=False):
         self.cycling = cycling
-        self.timer = ((col * 3 + row * 5) % 6) * 0.5
+        self.timer = (col + row) % 3 
         self.rect = pygame.Rect(0, 0, self.SIZE, self.SIZE)
         self.rect.center = (col * TILE_SIZE + TILE_SIZE // 2,
                             row * TILE_SIZE + TILE_SIZE // 2)
@@ -76,7 +70,7 @@ class Trap:
         """True while the spikes are up and can hurt the player."""
         if not self.cycling:
             return True
-        return (self.timer % self.CYCLE_TIME) < self.CYCLE_TIME / 2
+        return (self.timer % self.CYCLE_TIME) < self.CYCLE_TIME / 2 # 1.5 sec spikes up, 1.5 sec down
 
     def update(self, dt):
         self.timer += dt

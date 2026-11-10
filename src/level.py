@@ -16,11 +16,10 @@ class Level:
         self.number = number
         self.name = data["name"]
         self.maze = Maze(data["layout"])
-        self.player_start = (1, 1)
         self.items = []
         self.enemies = []
         self.traps = []
-        self.elapsed = 0.0          # seconds spent in this level
+        self.elapsed = 0.0  # seconds spent in this level
         self.completed = False
         self.locked_hint_timer = 0.0
         self._parse_layout(data["layout"], enemy_speed)
@@ -77,10 +76,8 @@ class Level:
 
     def check_door(self, player):
         door = self.maze.door_rect()
-        if door is None:
-            return []
         if self.maze.door_locked:
-            # "near the door" = within about 12 pixels of it
+            # "near the door" = within about 12 pixels of it on each side
             if player.rect.inflate(24, 24).colliderect(door):
                 if player.keys >= KEYS_REQUIRED:
                     self.maze.unlock_door()
@@ -94,7 +91,6 @@ class Level:
             return ["level_complete"]
         return []
 
-    #drawing
     def draw(self, surface, assets):
         self.maze.draw(surface, assets, self.elapsed)
         for trap in self.traps:

@@ -18,11 +18,8 @@ class Player:
         self.invincible_timer = 0.0
         self.walk_timer = 0.0
         self.rect = pygame.Rect(0, 0, self.SIZE, self.SIZE)
-        self.x = 0.0
-        self.y = 0.0
         self.set_tile_position(col, row)
 
-    #position
     def set_tile_position(self, col, row):
         """Put the player in the middle of the given tile."""
         self.x = col * TILE_SIZE + (TILE_SIZE - self.SIZE) / 2
@@ -43,7 +40,6 @@ class Player:
             dy += 1
         return dx, dy
 
-    #movement
     def move(self, dx, dy, dt, maze):
         self.moving = (dx != 0 or dy != 0)
         if not self.moving:
@@ -113,7 +109,6 @@ class Player:
     def add_score(self, points):
         self.score += points
 
-    #drawing
     def draw(self, surface, assets):
         if self.is_invincible and int(self.invincible_timer * 12) % 2 == 0:
             return

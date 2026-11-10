@@ -59,12 +59,7 @@ class Maze:
                 if self.is_solid(col, row):
                     blocking.append(self.tile_rect(col, row))
         return blocking
-
-    def collides(self, rect):
-        """True if `rect` overlaps any solid tile."""
-        return any(rect.colliderect(wall) for wall in self.get_blocking_rects(rect))
-
-    #door
+    
     def door_rect(self):
         if self.door_tile is None:
             return None
@@ -72,32 +67,6 @@ class Maze:
 
     def unlock_door(self):
         self.door_locked = False
-
-    #path finding (BFS)
-    def find_path(self, start, goal, avoid=()):
-        
-        avoid = set(avoid)
-        queue = deque([start])
-        came_from = {start: None}
-        while queue:
-            current = queue.popleft()
-            if current == goal:
-                path = []
-                while current is not None:
-                    path.append(current)
-                    current = came_from[current]
-                return path[::-1]
-            col, row = current
-            for step in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                nxt = (col + step[0], row + step[1])
-                if nxt in came_from or not self.in_bounds(*nxt):
-                    continue
-                tile = self.tile_at(*nxt)
-                walkable = tile not in SOLID_TILES and tile != DOOR and nxt not in avoid
-                if walkable or nxt == goal:
-                    came_from[nxt] = current
-                    queue.append(nxt)
-        return None
 
     #drawing
     def draw(self, surface, assets, time):

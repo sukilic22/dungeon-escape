@@ -1,8 +1,7 @@
 
 import pygame
 
-from src.settings import (IMAGES_DIR, SCREEN_HEIGHT, SCREEN_WIDTH, SOUNDS_DIR,
-                          SPRITE_SCALE, TILE_SIZE)
+from src.settings import *
 
 IMAGE_NAMES = [
     "player_down", "player_up", "player_side", "goblin", "skeleton", "slime",
@@ -47,12 +46,11 @@ class AssetManager:
                 pass
 
     def _make_effects(self):
-        self.shadow = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
+        self.shadow = pygame.Surface((TILE_SIZE, 16), pygame.SRCALPHA)
         for y in range(16):
-            alpha = int(120 * (1 - y / 16) ** 2)
-            pygame.draw.line(self.shadow, (10, 6, 20, alpha), (0, y), (TILE_SIZE, y))
+            pygame.draw.line(self.shadow, (10, 6, 20, 120 - 8 * y), (0, y), (TILE_SIZE, y))
         self.shadow_oval = pygame.Surface((32, 12), pygame.SRCALPHA)
-        pygame.draw.ellipse(self.shadow_oval, (0, 0, 0, 90), self.shadow_oval.get_rect())
+        pygame.draw.ellipse(self.shadow_oval, (0, 0, 0, 90), (0, 0, 32, 12))
         self._glows = [self._make_glow(strength) for strength in (0.7, 0.85, 1.0)]
         self.background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         for row in range(SCREEN_HEIGHT // TILE_SIZE):
@@ -60,11 +58,7 @@ class AssetManager:
                 self.background.blit(self.image("wall_%d" % ((col + row) % 2)),
                                      (col * TILE_SIZE, row * TILE_SIZE))
         self.background.fill((105, 95, 130), special_flags=pygame.BLEND_RGB_MULT)
-        self.vignette = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        for i in range(0, 140, 4):
-            alpha = int(150 * (1 - i / 140) ** 2)
-            pygame.draw.rect(self.vignette, (6, 4, 14, alpha),
-                             (i, i, SCREEN_WIDTH - 2 * i, SCREEN_HEIGHT - 2 * i), 4)
+        self.vignette = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)        
 
     @staticmethod
     def _make_glow(strength, radius=110):
@@ -77,10 +71,12 @@ class AssetManager:
 
     def glow(self, flicker):
         """Pick a glow surface. `flicker` is between 0.85 and 1.0."""
-        index = min(2, max(0, int((flicker - 0.85) / 0.075 + 0.5)))
-        return self._glows[index]
+        if flicker < 0.9:
+            return self._glows[0]      # least glow
+        if flicker < 0.97:
+            return self._glows[1]
+        return self._glows[2]          # most glow
 
-    #images
     def image(self, name, scale=SPRITE_SCALE):
         key = (name, scale)
         if key not in self._scaled:

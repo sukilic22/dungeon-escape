@@ -1,14 +1,11 @@
-
 import pygame
 
 from src.asset_manager import AssetManager
 from src.level import Level
 from src.player import Player
 from src.score_manager import ScoreManager
-from src.screens import (AdminLoginScreen, AdminPanelScreen, GameOverScreen, GameplayScreen,
-                         HighScoresScreen, LevelCompleteScreen, MenuScreen, PauseScreen,
-                         SettingsScreen, VictoryScreen)
-from src.settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, TOTAL_LEVELS, GameSettings
+from src.screens import (AdminLoginScreen, AdminPanelScreen, GameOverScreen, GameplayScreen, HighScoresScreen, LevelCompleteScreen, MenuScreen, PauseScreen, SettingsScreen, VictoryScreen)
+from src.settings import *
 
 
 class Game:
@@ -29,12 +26,11 @@ class Game:
         self.score_manager = ScoreManager()
         pygame.display.set_icon(self.assets.image("player_down", 2))
 
-        # data of the current playthrough
         self.player = None
         self.level = None
         self.level_number = 1
         self.player_name = "Player"
-        self.last_bonus = (0, 0, 0)      # level bonus, health bonus, time bonus
+        self.last_bonus = (0, 0, 0)
 
         #one object per screen
         self.screens = {
@@ -52,33 +48,28 @@ class Game:
         self.state = None
         self.change_state("menu")
 
-    #state handling
     def change_state(self, name):
-        """Switch to another screen."""
         self.state = self.screens[name]
         self.state.on_enter()
 
-    #playthrough control
     def start_new_game(self):
         config = self.settings.difficulty_config
         self.player = Player(max_health=config["health"])
-        self.level_number = 1
         self.load_level(1)
         self.change_state("gameplay")
 
     def load_level(self, number):
         self.level_number = number
         self.level = Level(number, self.settings.difficulty_config["enemy_speed"])
-        self.player.set_tile_position(*self.level.player_start)
+        col, row = self.level.player_start
+        self.player.set_tile_position(col, row)
         self.player.keys = 0
         self.player.invincible_timer = 0.0
         self.screens["gameplay"].reset_effects()
 
     def level_finished(self):
-        parts = ScoreManager.level_bonus_parts(self.level_number, self.player.health,
-                                               self.level.elapsed)
-        self.last_bonus = parts
-        self.player.add_score(sum(parts))
+        self.last_bonus = ScoreManager.level_bonus_parts(self.level_number, self.player.health, self.level.elapsed)
+        self.player.add_score(sum(self.last_bonus))
         self.assets.play("win")
         if self.level_number >= TOTAL_LEVELS:
             self.change_state("victory")
@@ -104,8 +95,7 @@ class Game:
     #main loop
     def run(self):
         while self.running:
-            # dt = seconds since last frame (limited, so a lag spike cannot
-            # make the player jump through a wall)
+            # dt = seconds since last frame (limited, so a lag cannot make the player jump through a wall)
             dt = min(self.clock.tick(FPS) / 1000.0, 0.05)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

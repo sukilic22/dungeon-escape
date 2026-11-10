@@ -37,22 +37,14 @@ class Enemy:
         self.rect.topleft = (round(self.x), round(self.y))
 
         for wall in maze.get_blocking_rects(self.rect):
-            if not self.rect.colliderect(wall):
-                continue
-            if self.axis == "x":
-                if self.direction > 0:
-                    self.rect.right = wall.left
+            if self.rect.colliderect(wall):
+                if self.axis == "x":
+                    self.x -= step
                 else:
-                    self.rect.left = wall.right
-                self.x = self.rect.x
-            else:
-                if self.direction > 0:
-                    self.rect.bottom = wall.top
-                else:
-                    self.rect.top = wall.bottom
-                self.y = self.rect.y
-            self.direction *= -1
-            break
+                    self.y -= step
+                self.rect.topleft = (round(self.x), round(self.y))
+                self.direction *= -1
+                break
 
     def touches(self, rect):
         """True if the enemy overlaps `rect` (use for hurting the player)."""
@@ -60,11 +52,7 @@ class Enemy:
 
     def draw(self, surface, assets):
         image = assets.image(self.kind)
-        if self.axis == "x":
-            flip = self.direction < 0                 
-        else:
-            flip = int(self.timer * 4) % 2 == 1       
-        if flip:
+        if self.direction < 0:
             image = pygame.transform.flip(image, True, False)
         bob = 3 if int(self.timer * 6) % 2 else 0
         pos = (self.rect.centerx - image.get_width() // 2,
