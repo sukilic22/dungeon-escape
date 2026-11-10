@@ -3,8 +3,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from src.settings import (HEALTH_BONUS, LEVEL_BASE_BONUS, MAX_NAME_LENGTH,
-                          SCORES_FILE, TIME_BONUS_LIMIT, TIME_BONUS_PER_SECOND)
+from src.settings import *
 
 
 class ScoreManager:
@@ -30,7 +29,6 @@ class ScoreManager:
 
     @staticmethod
     def calculate_level_bonus(level_number, health, seconds):
-        """Total bonus points for finishing a level."""
         return sum(ScoreManager.level_bonus_parts(level_number, health, seconds))
 
     #file I/O
