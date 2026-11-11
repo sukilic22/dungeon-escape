@@ -5,7 +5,7 @@ from src.asset_manager import AssetManager
 from src.level import Level
 from src.player import Player
 from src.score_manager import ScoreManager
-from src.screens import (AdminLoginScreen, AdminPanelScreen, GameOverScreen, GameplayScreen,
+from src.screens import (GameOverScreen, GameplayScreen,
                          HighScoresScreen, LevelCompleteScreen, MenuScreen, PauseScreen,
                          SettingsScreen, VictoryScreen)
 from src.settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, TOTAL_LEVELS, GameSettings
@@ -46,8 +46,7 @@ class Game:
             "game_over": GameOverScreen(self),
             "victory": VictoryScreen(self),
             "level_complete": LevelCompleteScreen(self),
-            "admin_login": AdminLoginScreen(self),
-            "admin_panel": AdminPanelScreen(self),
+            
         }
         self.state = None
         self.change_state("menu")

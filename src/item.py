@@ -49,9 +49,7 @@ class Item:
             name = "chest_open" if self.collected else "chest_closed"
             surface.blit(assets.image(name), self._image_pos(assets, name, 0))
         elif not self.collected:
-            # Small up-and-down bobbing so items catch the eye.
-            bob = 2 if int(time * 3) % 2 else 0
-            surface.blit(assets.image(self.kind), self._image_pos(assets, self.kind, bob))
+            surface.blit(assets.image(self.kind), self._image_pos(assets, self.kind, 0))
 
     def _image_pos(self, assets, name, bob):
         image = assets.image(name)
@@ -73,7 +71,6 @@ class Trap:
 
     @property
     def is_active(self):
-        """True while the spikes are up and can hurt the player."""
         if not self.cycling:
             return True
         return (self.timer % self.CYCLE_TIME) < self.CYCLE_TIME / 2
@@ -85,6 +82,6 @@ class Trap:
         return self.is_active and self.rect.colliderect(rect)
 
     def draw(self, surface, assets):
-        name = "spikes_up" if self.is_active else "spikes_down"
-        image = assets.image(name)
-        surface.blit(image, image.get_rect(center=self.rect.center))
+        if self.is_active:
+            image = assets.image("spikes_up")
+            surface.blit(image, image.get_rect(center=self.rect.center))

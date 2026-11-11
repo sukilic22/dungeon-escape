@@ -55,16 +55,11 @@ class Enemy:
             break
 
     def touches(self, rect):
-        """True if the enemy overlaps `rect` (use for hurting the player)."""
         return self.rect.colliderect(rect)
 
     def draw(self, surface, assets):
         image = assets.image(self.kind)
-        if self.axis == "x":
-            flip = self.direction < 0                 
-        else:
-            flip = int(self.timer * 4) % 2 == 1       
-        if flip:
+        if self.axis == "x" and self.direction < 0:
             image = pygame.transform.flip(image, True, False)
         bob = 3 if int(self.timer * 6) % 2 else 0
         pos = (self.rect.centerx - image.get_width() // 2,
