@@ -139,8 +139,7 @@ class MenuScreen(Screen):
             pygame.draw.line(surface, COLOR_GOLD, (x, 246), (x + side * 40, 246), 3)
             pygame.draw.polygon(surface, COLOR_GOLD, [(x, 246), (x + side * 10, 240), (x + side * 10, 252)])
         self.draw_buttons(surface)
-        draw_text(surface, "WASD / Arrows: move   ESC: pause", 20, (130, 126, 150),
-                  (CX, SCREEN_HEIGHT - 18))
+        
 
 
 
@@ -155,9 +154,8 @@ class GameplayScreen(Screen):
         self.banner_timer = 0.0
 
     def reset_effects(self):
-        """Called whenever a level starts."""
         self.flash_timer = 0.0
-        self.banner_timer = 3.0
+        self.banner_timer = 1.5
 
     def pause(self):
         self.game.change_state("pause")

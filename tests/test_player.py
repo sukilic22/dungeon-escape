@@ -1,4 +1,4 @@
-"""Tests for Player: movement, collision, health, score and keys."""
+
 
 import pygame
 
@@ -16,7 +16,6 @@ ROOM = [
 
 
 class FakeKeys(dict):
-    """Pretends to be pygame.key.get_pressed()."""
 
     def __getitem__(self, key):
         return self.get(key, False)
@@ -39,9 +38,9 @@ def test_move_right_changes_position():
 def test_player_cannot_walk_through_wall():
     maze = Maze(ROOM)
     player = Player(1, 1)
-    for _ in range(100):                   # walk left for a long time
+    for _ in range(100):                  
         player.move(-1, 0, 0.05, maze)
-    assert player.rect.left >= TILE_SIZE   # stopped at the wall tile
+    assert player.rect.left >= TILE_SIZE   
 
 
 def test_player_cannot_leave_room_vertically():
@@ -80,7 +79,7 @@ def test_invincibility_prevents_double_damage():
     player.take_damage()
     assert player.take_damage() is False
     assert player.health == 2
-    player.update(Player.INVINCIBLE_TIME + 0.1)     # protection runs out
+    player.update(Player.INVINCIBLE_TIME + 0.1)     
     assert player.take_damage() is True
     assert player.health == 1
 
