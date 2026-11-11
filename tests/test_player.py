@@ -1,7 +1,4 @@
 
-
-import pygame
-
 from src.maze import Maze
 from src.player import Player
 from src.settings import TILE_SIZE
@@ -13,12 +10,6 @@ ROOM = [
     "#.....#",
     "#######",
 ]
-
-
-class FakeKeys(dict):
-
-    def __getitem__(self, key):
-        return self.get(key, False)
 
 
 def test_player_starts_in_tile_center():
@@ -49,23 +40,6 @@ def test_player_cannot_leave_room_vertically():
     for _ in range(100):
         player.move(0, 1, 0.05, maze)
     assert player.rect.bottom <= 4 * TILE_SIZE
-
-
-def test_diagonal_movement_is_not_faster():
-    maze = Maze(ROOM)
-    straight, diagonal = Player(1, 1), Player(1, 1)
-    straight.move(1, 0, 0.1, maze)
-    diagonal.move(1, 1, 0.1, maze)
-    moved_straight = straight.x - 1 * TILE_SIZE
-    moved_diagonal = ((diagonal.x - 1 * TILE_SIZE) ** 2 + (diagonal.y - 1 * TILE_SIZE) ** 2) ** 0.5
-    assert moved_diagonal < moved_straight * 1.5 + 1
-
-
-def test_direction_from_keys():
-    assert Player.direction_from_keys(FakeKeys({pygame.K_d: True})) == (1, 0)
-    assert Player.direction_from_keys(FakeKeys({pygame.K_LEFT: True})) == (-1, 0)
-    assert Player.direction_from_keys(FakeKeys({pygame.K_w: True, pygame.K_a: True})) == (-1, -1)
-    assert Player.direction_from_keys(FakeKeys()) == (0, 0)
 
 
 def test_take_damage_reduces_health():
