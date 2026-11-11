@@ -163,7 +163,6 @@ class HUD:
 
     def draw(self, surface, assets, player, level, keys_required):
         self._draw_stats(surface, assets, player, keys_required)
-        self._draw_minimap(surface, level, player)
         label = f"Level {level.number}/{TOTAL_LEVELS} - {level.name}"
         draw_text(surface, label, 26, COLOR_GOLD, (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 24))
 
@@ -183,28 +182,7 @@ class HUD:
         key_color = COLOR_GOLD if player.keys >= keys_required else COLOR_TEXT
         draw_text(surface, f"{player.keys}/{keys_required}", 26, key_color, (panel.x + 52, panel.y + 70), "midleft")
 
-    def _draw_minimap(self, surface, level, player):
-        maze = level.maze
-        cell = 4
-        box = pygame.Rect(SCREEN_WIDTH - maze.cols * cell - 16, 12, maze.cols * cell, maze.rows * cell)
-        pygame.draw.rect(surface, (18, 14, 28), box)
-        pygame.draw.rect(surface, (120, 116, 146), box, 2)
-
-        for r in range(maze.rows):
-            for c in range(maze.cols):
-                tile = maze.tile_at(c, r)
-                if tile in SOLID_TILES:
-                    pygame.draw.rect(surface, (96, 92, 120), (box.x + c * cell, box.y + r * cell, cell, cell))
-                elif tile == "E":
-                    pygame.draw.rect(surface, (214, 150, 60), (box.x + c * cell, box.y + r * cell, cell, cell))
-
-        for item in level.items:
-            if item.kind == "key" and not item.collected:
-                kx, ky = item.rect.centerx * cell // TILE_SIZE, item.rect.centery * cell // TILE_SIZE
-                pygame.draw.rect(surface, COLOR_GOLD, (box.x + kx - 1, box.y + ky - 1, 4, 4))
-
-        px, py = player.rect.centerx * cell // TILE_SIZE, player.rect.centery * cell // TILE_SIZE
-        pygame.draw.rect(surface, (110, 160, 255), (box.x + px - 1, box.y + py - 1, 4, 4))
+   
 
     def draw_pause_button(self, surface):
         color = (118, 112, 146) if self.PAUSE_RECT.collidepoint(pygame.mouse.get_pos()) else (84, 80, 106)
