@@ -1,4 +1,3 @@
-import hashlib
 import json
 from pathlib import Path
 
@@ -47,12 +46,7 @@ DIFFICULTIES = {
 }
 DIFFICULTY_ORDER = ["Easy", "Normal", "Hard"]
 
-ADMIN_PASSWORD_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"
 
-
-def check_admin_password(password):
-    entered_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
-    return entered_hash == ADMIN_PASSWORD_HASH
 
 
 class GameSettings:

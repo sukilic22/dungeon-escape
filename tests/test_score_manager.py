@@ -3,7 +3,7 @@
 import json
 
 from src.score_manager import ScoreManager
-from src.settings import GameSettings, check_admin_password
+from src.settings import GameSettings
 
 
 def make_manager(tmp_path):
@@ -134,11 +134,8 @@ def test_bonus_parts_add_up():
     assert sum(parts) == ScoreManager.calculate_level_bonus(3, 2, 30)
 
 
-# --------------------------------------------------------- settings / admin
-def test_admin_password_check():
-    assert check_admin_password("admin123")
-    assert not check_admin_password("wrong")
-    assert not check_admin_password("")
+#settings / admin
+
 
 
 def test_settings_roundtrip(tmp_path):
